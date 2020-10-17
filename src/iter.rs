@@ -49,12 +49,22 @@ impl<'a> JsonKeyPathIter<'a> {
         }
     }
 
+    pub fn new_with_square_bracket_style(base_path: &'a str, json: &'a Value) -> Self {
+        Self::new(base_path, "[\"", "\"]", "[", "]", true, false, json)
+    }
+
     pub fn new_with_common_js_style(base_path: &'a str, json: &'a Value) -> Self {
         Self::new(base_path, ".", "", "[", "]", true, false, json)
     }
 
     pub fn new_with_postgres_style(base_path: &'a str, json: &'a Value) -> Self {
         Self::new(base_path, "->'", "'", "->", "", true, false, json)
+    }
+}
+
+impl<'a> From<&'a Value> for JsonKeyPathIter<'a> {
+    fn from(item: &'a Value) -> JsonKeyPathIter<'a> {
+        JsonKeyPathIter::new_with_square_bracket_style("", item)
     }
 }
 
