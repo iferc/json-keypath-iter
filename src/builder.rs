@@ -74,12 +74,6 @@ impl<'a> JsonKeyPathIterBuilder<'a> {
     pub fn build(&self, json: &'a Value) -> Result<JsonKeyPathIter<'a>, &'static str> {
         Ok(JsonKeyPathIter::new(
             self.base_path.unwrap_or(""),
-            self.object_key_prefix.unwrap_or("[\""),
-            self.object_key_suffix.unwrap_or("\"]"),
-            self.array_key_prefix.unwrap_or("["),
-            self.array_key_suffix.unwrap_or("]"),
-            self.indices_in_path,
-            self.skip_parents,
             json
         ))
     }

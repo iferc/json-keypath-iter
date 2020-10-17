@@ -1,6 +1,12 @@
 use serde_json::{Value};
 use std::collections::VecDeque;
 
+pub enum JsonKeyPathStyle {
+    SquareBrackets,
+    CommonJs, // unsure of this name
+    PostgresJson,
+}
+
 #[derive(Debug)]
 pub struct JsonKeyPathElement<'a> {
     pub path: String,
@@ -23,12 +29,34 @@ pub struct JsonKeyPathIter<'a> {
 impl<'a> JsonKeyPathIter<'a> {
     pub fn new(
         base_path: &'a str,
+        json: &'a Value,
+    ) -> Self {
+        let mut queue = VecDeque::new();
+        queue.push_back(JsonKeyPathElement {
+            path: String::from(base_path),
+            indices: Vec::new(),
+            value: json,
+        });
+
+        Self {
+            object_key_prefix: "[\"",
+            object_key_suffix: "\"]",
+            array_key_prefix: "[",
+            array_key_suffix: "]",
+            indices_in_path: true,
+            skip_parents: false,
+            items: queue,
+        }
+    }
+
+    pub fn new_with_style(
         object_key_prefix: &'a str,
         object_key_suffix: &'a str,
         array_key_prefix: &'a str,
         array_key_suffix: &'a str,
         indices_in_path: bool,
         skip_parents: bool,
+        base_path: &'a str,
         json: &'a Value,
     ) -> Self {
         let mut queue = VecDeque::new();
@@ -49,22 +77,40 @@ impl<'a> JsonKeyPathIter<'a> {
         }
     }
 
-    pub fn new_with_square_bracket_style(base_path: &'a str, json: &'a Value) -> Self {
-        Self::new(base_path, "[\"", "\"]", "[", "]", true, false, json)
-    }
-
-    pub fn new_with_common_js_style(base_path: &'a str, json: &'a Value) -> Self {
-        Self::new(base_path, ".", "", "[", "]", true, false, json)
-    }
-
-    pub fn new_with_postgres_style(base_path: &'a str, json: &'a Value) -> Self {
-        Self::new(base_path, "->'", "'", "->", "", true, false, json)
+    pub fn use_style(mut self, style: JsonKeyPathStyle) -> Self {
+        match style {
+            JsonKeyPathStyle::SquareBrackets => {
+                self.object_key_prefix = "[\"";
+                self.object_key_suffix = "\"]";
+                self.array_key_prefix = "[";
+                self.array_key_suffix = "]";
+                self.indices_in_path = true;
+                self.skip_parents = false;
+            }
+            JsonKeyPathStyle::CommonJs => {
+                self.object_key_prefix = ".";
+                self.object_key_suffix = "";
+                self.array_key_prefix = "[";
+                self.array_key_suffix = "]";
+                self.indices_in_path = true;
+                self.skip_parents = false;
+            }
+            JsonKeyPathStyle::PostgresJson => {
+                self.object_key_prefix = "->'";
+                self.object_key_suffix = "'";
+                self.array_key_prefix = "->";
+                self.array_key_suffix = "";
+                self.indices_in_path = true;
+                self.skip_parents = false;
+            }
+        }
+        self
     }
 }
 
 impl<'a> From<&'a Value> for JsonKeyPathIter<'a> {
     fn from(item: &'a Value) -> JsonKeyPathIter<'a> {
-        JsonKeyPathIter::new_with_square_bracket_style("", item)
+        JsonKeyPathIter::new("", item)
     }
 }
 
@@ -146,7 +192,7 @@ mod tests {
             "c": {"z": false},
         });
 
-        let jkpi = JsonKeyPathIter::new("BASE", ".", "", "[", "]", true, false, &val);
+        let jkpi = JsonKeyPathIter::new("BASE", &val);
 
         println!("\nbeginning:");
         for el in jkpi {
