@@ -28,12 +28,11 @@ pub struct JsonKeyPathIter<'a> {
 
 impl<'a> JsonKeyPathIter<'a> {
     pub fn new(
-        base_path: &'a str,
         json: &'a Value,
     ) -> Self {
         let mut queue = VecDeque::new();
         queue.push_back(JsonKeyPathElement {
-            path: String::from(base_path),
+            path: String::from(""),
             indices: Vec::new(),
             value: json,
         });
@@ -56,12 +55,11 @@ impl<'a> JsonKeyPathIter<'a> {
         array_key_suffix: &'a str,
         indices_in_path: bool,
         skip_parents: bool,
-        base_path: &'a str,
         json: &'a Value,
     ) -> Self {
         let mut queue = VecDeque::new();
         queue.push_back(JsonKeyPathElement {
-            path: String::from(base_path),
+            path: String::from(""),
             indices: Vec::new(),
             value: json,
         });
@@ -110,7 +108,7 @@ impl<'a> JsonKeyPathIter<'a> {
 
 impl<'a> From<&'a Value> for JsonKeyPathIter<'a> {
     fn from(item: &'a Value) -> JsonKeyPathIter<'a> {
-        JsonKeyPathIter::new("", item)
+        JsonKeyPathIter::new(item)
     }
 }
 
@@ -192,7 +190,7 @@ mod tests {
             "c": {"z": false},
         });
 
-        let jkpi = JsonKeyPathIter::new("BASE", &val);
+        let jkpi = JsonKeyPathIter::new(&val);
 
         println!("\nbeginning:");
         for el in jkpi {
