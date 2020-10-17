@@ -1,3 +1,6 @@
+pub mod style;
+pub use style::*;
+
 pub mod builder;
 pub use builder::*;
 

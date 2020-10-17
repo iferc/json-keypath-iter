@@ -1,35 +1,21 @@
-use serde_json::{Value};
+use crate::style::{JsonKeyPathStyles, JsonKeyPathStyle};
+use serde_json::Value;
 use std::collections::VecDeque;
-
-pub enum JsonKeyPathStyle {
-    SquareBrackets,
-    CommonJs, // unsure of this name
-    PostgresJson,
-}
 
 #[derive(Debug)]
 pub struct JsonKeyPathElement<'a> {
-    pub path: String,
-    pub indices: Vec<usize>,
-    pub value: &'a Value,
+    path: String,
+    indices: Vec<usize>,
+    value: &'a Value,
 }
 
 pub struct JsonKeyPathIter<'a> {
-    object_key_prefix: &'a str,
-    object_key_suffix: &'a str,
-    array_key_prefix: &'a str,
-    array_key_suffix: &'a str,
-    indices_in_path: bool,
-    /// whether to use callback when element has children
-    skip_parents: bool,
-
+    style: JsonKeyPathStyle<'a>,
     items: VecDeque<JsonKeyPathElement<'a>>,
 }
 
 impl<'a> JsonKeyPathIter<'a> {
-    pub fn new(
-        json: &'a Value,
-    ) -> Self {
+    pub fn new(json: &'a Value) -> Self {
         let mut queue = VecDeque::new();
         queue.push_back(JsonKeyPathElement {
             path: String::from(""),
@@ -38,70 +24,13 @@ impl<'a> JsonKeyPathIter<'a> {
         });
 
         Self {
-            object_key_prefix: "[\"",
-            object_key_suffix: "\"]",
-            array_key_prefix: "[",
-            array_key_suffix: "]",
-            indices_in_path: true,
-            skip_parents: false,
             items: queue,
+            style: JsonKeyPathStyle::from(&JsonKeyPathStyles::SquareBrackets),
         }
     }
 
-    pub fn new_with_style(
-        object_key_prefix: &'a str,
-        object_key_suffix: &'a str,
-        array_key_prefix: &'a str,
-        array_key_suffix: &'a str,
-        indices_in_path: bool,
-        skip_parents: bool,
-        json: &'a Value,
-    ) -> Self {
-        let mut queue = VecDeque::new();
-        queue.push_back(JsonKeyPathElement {
-            path: String::from(""),
-            indices: Vec::new(),
-            value: json,
-        });
-
-        Self {
-            object_key_prefix,
-            object_key_suffix,
-            array_key_prefix,
-            array_key_suffix,
-            indices_in_path,
-            skip_parents,
-            items: queue,
-        }
-    }
-
-    pub fn use_style(mut self, style: JsonKeyPathStyle) -> Self {
-        match style {
-            JsonKeyPathStyle::SquareBrackets => {
-                self.object_key_prefix = "[\"";
-                self.object_key_suffix = "\"]";
-                self.array_key_prefix = "[";
-                self.array_key_suffix = "]";
-                self.indices_in_path = true;
-                self.skip_parents = false;
-            }
-            JsonKeyPathStyle::CommonJs => {
-                self.object_key_prefix = ".";
-                self.object_key_suffix = "";
-                self.array_key_prefix = "[";
-                self.array_key_suffix = "]";
-                self.indices_in_path = true;
-                self.skip_parents = false;
-            }
-            JsonKeyPathStyle::PostgresJson => {
-                self.object_key_prefix = "->'";
-                self.object_key_suffix = "'";
-                self.array_key_prefix = "->";
-                self.array_key_suffix = "";
-                self.indices_in_path = true;
-                self.skip_parents = false;
-            }
-        }
+    pub fn use_style(mut self, style: &'a JsonKeyPathStyles) -> Self {
+        self.style = JsonKeyPathStyle::from(style);
         self
     }
 }
@@ -123,9 +52,9 @@ impl<'a> Iterator for JsonKeyPathIter<'a> {
                         let new_path = format!(
                             "{}{}{}{}",
                             el.path,
-                            self.object_key_prefix,
+                            self.style.object_key_prefix,
                             key,
-                            self.object_key_suffix,
+                            self.style.object_key_suffix,
                         );
 
                         self.items.push_front(JsonKeyPathElement {
@@ -134,26 +63,26 @@ impl<'a> Iterator for JsonKeyPathIter<'a> {
                             value: val,
                         });
                     }
-                    if !self.skip_parents {
+                    if !self.style.skip_parents {
                         return Some(el);
                     }
                 }
                 Value::Array(arr) => {
                     for (index, val) in arr.iter().enumerate().rev() {
-                        let new_path = if self.indices_in_path {
+                        let new_path = if self.style.indices_in_path {
                             format!(
                                 "{}{}{}{}",
                                 el.path,
-                                self.array_key_prefix,
+                                self.style.array_key_prefix,
                                 index,
-                                self.array_key_suffix,
+                                self.style.array_key_suffix,
                             )
                         } else {
                             format!(
                                 "{}{}{}",
                                 el.path,
-                                self.array_key_prefix,
-                                self.array_key_suffix,
+                                self.style.array_key_prefix,
+                                self.style.array_key_suffix,
                             )
                         };
 
@@ -166,7 +95,7 @@ impl<'a> Iterator for JsonKeyPathIter<'a> {
                             value: val,
                         });
                     }
-                    if !self.skip_parents {
+                    if !self.style.skip_parents {
                         return Some(el);
                     }
                 }
@@ -215,14 +144,8 @@ mod tests {
         });
 
         let jkpi = JsonKeyPathIter {
-            object_key_prefix: ".",
-            object_key_suffix: "",
-            array_key_prefix: "[",
-            array_key_suffix: "]",
-            indices_in_path: true,
-            skip_parents: false,
-
             items: queue,
+            style: JsonKeyPathStyle::from(&JsonKeyPathStyles::CommonJs),
         };
 
         println!("\nbeginning:");
@@ -248,14 +171,8 @@ mod tests {
         });
 
         let jkpi = JsonKeyPathIter {
-            object_key_prefix: "->'",
-            object_key_suffix: "'",
-            array_key_prefix: "->",
-            array_key_suffix: "",
-            indices_in_path: true,
-            skip_parents: false,
-
             items: queue,
+            style: JsonKeyPathStyle::from(&JsonKeyPathStyles::PostgresJson),
         };
 
         println!("\nbeginning:");
@@ -277,14 +194,8 @@ mod tests {
         });
 
         let jkpi = JsonKeyPathIter {
-            object_key_prefix: ".",
-            object_key_suffix: "",
-            array_key_prefix: "[",
-            array_key_suffix: "]",
-            indices_in_path: false,
-            skip_parents: false,
-
             items: queue,
+            style: JsonKeyPathStyle::from(&JsonKeyPathStyles::CommonJs),
         };
 
         println!("\nbeginning:");
@@ -307,14 +218,8 @@ mod tests {
         });
 
         let jkpi = JsonKeyPathIter {
-            object_key_prefix: ".",
-            object_key_suffix: "",
-            array_key_prefix: "[",
-            array_key_suffix: "]",
-            indices_in_path: true,
-            skip_parents: false,
-
             items: queue,
+            style: JsonKeyPathStyle::from(&JsonKeyPathStyles::CommonJs),
         };
 
         println!("\nbeginning:");
