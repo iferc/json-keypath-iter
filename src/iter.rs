@@ -73,6 +73,7 @@ impl<'a> Iterator for JsonKeyPathIter<'a> {
                             key,
                             self.object_key_suffix,
                         );
+
                         self.items.push_front(JsonKeyPathElement {
                             path: new_path,
                             indices: el.indices.clone(),
@@ -85,15 +86,26 @@ impl<'a> Iterator for JsonKeyPathIter<'a> {
                 }
                 Value::Array(arr) => {
                     for (index, val) in arr.iter().enumerate().rev() {
-                        let new_path = format!(
-                            "{}{}{}{}",
-                            el.path,
-                            self.array_key_prefix,
-                            if self.indices_in_path { format!("{}", index) } else { String::from("") },
-                            self.array_key_suffix,
-                        );
+                        let new_path = if self.indices_in_path {
+                            format!(
+                                "{}{}{}{}",
+                                el.path,
+                                self.array_key_prefix,
+                                index,
+                                self.array_key_suffix,
+                            )
+                        } else {
+                            format!(
+                                "{}{}{}",
+                                el.path,
+                                self.array_key_prefix,
+                                self.array_key_suffix,
+                            )
+                        };
+
                         let mut indices_vec = el.indices.to_vec();
                         indices_vec.push(index);
+
                         self.items.push_front(JsonKeyPathElement {
                             path: new_path,
                             indices: indices_vec,
