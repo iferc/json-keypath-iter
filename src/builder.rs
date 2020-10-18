@@ -1,7 +1,6 @@
-use crate::{JsonKeyPathIter};
-use serde_json::Value;
+use crate::Style;
 
-pub struct JsonKeyPathIterBuilder<'a>
+pub struct StyleBuilder<'a>
 {
     base_path: Option<&'a str>,
     object_key_prefix: Option<&'a str>,
@@ -13,9 +12,9 @@ pub struct JsonKeyPathIterBuilder<'a>
     skip_parents: bool,
 }
 
-impl<'a> JsonKeyPathIterBuilder<'a> {
+impl<'a> StyleBuilder<'a> {
     pub fn new() -> Self {
-        JsonKeyPathIterBuilder {
+        StyleBuilder {
             base_path: None,
             object_key_prefix: None,
             object_key_suffix: None,
@@ -71,7 +70,14 @@ impl<'a> JsonKeyPathIterBuilder<'a> {
         self
     }
 
-    pub fn build(&self, json: &'a Value) -> Result<JsonKeyPathIter<'a>, &'static str> {
-        Ok(JsonKeyPathIter::new(json))
+    pub fn build(&self) -> Result<Style<'a>, &'static str> {
+        Ok(Style {
+            object_key_prefix: self.object_key_prefix.unwrap_or("[\""),
+            object_key_suffix: self.object_key_suffix.unwrap_or("\"]"),
+            array_key_prefix: self.array_key_prefix.unwrap_or("["),
+            array_key_suffix: self.array_key_suffix.unwrap_or("]"),
+            indices_in_path: self.indices_in_path,
+            skip_parents: self.skip_parents,
+        })
     }
 }

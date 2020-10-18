@@ -1,12 +1,12 @@
-pub enum JsonKeyPathStyles<'a> {
+pub enum Styles<'a> {
     SquareBrackets,
     CommonJs,
     PostgresJson,
-    Custom(JsonKeyPathStyle<'a>),
+    Custom(Style<'a>),
 }
 
 #[derive(Debug)]
-pub struct JsonKeyPathStyle<'a> {
+pub struct Style<'a> {
     pub object_key_prefix: &'a str,
     pub object_key_suffix: &'a str,
     pub array_key_prefix: &'a str,
@@ -15,11 +15,11 @@ pub struct JsonKeyPathStyle<'a> {
     pub skip_parents: bool,
 }
 
-impl<'a> From<&'a JsonKeyPathStyles<'a>> for JsonKeyPathStyle<'a> {
-    fn from(style: &'a JsonKeyPathStyles) -> JsonKeyPathStyle<'a> {
+impl<'a> From<&'a Styles<'a>> for Style<'a> {
+    fn from(style: &'a Styles) -> Style<'a> {
         match style {
-            JsonKeyPathStyles::SquareBrackets => {
-                return JsonKeyPathStyle {
+            Styles::SquareBrackets => {
+                return Style {
                     object_key_prefix: "[\"",
                     object_key_suffix: "\"]",
                     array_key_prefix: "[",
@@ -28,8 +28,8 @@ impl<'a> From<&'a JsonKeyPathStyles<'a>> for JsonKeyPathStyle<'a> {
                     skip_parents: false,
                 }
             }
-            JsonKeyPathStyles::CommonJs => {
-                return JsonKeyPathStyle {
+            Styles::CommonJs => {
+                return Style {
                     object_key_prefix: ".",
                     object_key_suffix: "",
                     array_key_prefix: "[",
@@ -38,8 +38,8 @@ impl<'a> From<&'a JsonKeyPathStyles<'a>> for JsonKeyPathStyle<'a> {
                     skip_parents: false,
                 }
             }
-            JsonKeyPathStyles::PostgresJson => {
-                return JsonKeyPathStyle {
+            Styles::PostgresJson => {
+                return Style {
                     object_key_prefix: "->'",
                     object_key_suffix: "'",
                     array_key_prefix: "->",
@@ -48,8 +48,8 @@ impl<'a> From<&'a JsonKeyPathStyles<'a>> for JsonKeyPathStyle<'a> {
                     skip_parents: false,
                 }
             }
-            JsonKeyPathStyles::Custom(style_details) => {
-                return JsonKeyPathStyle {
+            Styles::Custom(style_details) => {
+                return Style {
                     object_key_prefix: style_details.object_key_prefix,
                     object_key_suffix: style_details.object_key_suffix,
                     array_key_prefix: style_details.array_key_prefix,
