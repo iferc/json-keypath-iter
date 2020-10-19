@@ -25,7 +25,7 @@ impl<'a> From<&'a Styles<'a>> for Style<'a> {
                     array_key_prefix: "[",
                     array_key_suffix: "]",
                     indices_in_path: true,
-                    skip_parents: false,
+                    skip_parents: true,
                 }
             }
             Styles::CommonJs => {
@@ -35,7 +35,7 @@ impl<'a> From<&'a Styles<'a>> for Style<'a> {
                     array_key_prefix: "[",
                     array_key_suffix: "]",
                     indices_in_path: false,
-                    skip_parents: false,
+                    skip_parents: true,
                 }
             }
             Styles::PostgresJson => {
@@ -45,7 +45,7 @@ impl<'a> From<&'a Styles<'a>> for Style<'a> {
                     array_key_prefix: "->",
                     array_key_suffix: "",
                     indices_in_path: true,
-                    skip_parents: false,
+                    skip_parents: true,
                 }
             }
             Styles::Custom(style_details) => {
