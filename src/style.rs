@@ -34,7 +34,7 @@ impl<'a> From<&'a Styles<'a>> for Style<'a> {
                     object_key_suffix: "",
                     array_key_prefix: "[",
                     array_key_suffix: "]",
-                    indices_in_path: true,
+                    indices_in_path: false,
                     skip_parents: false,
                 }
             }

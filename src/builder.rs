@@ -2,7 +2,6 @@ use crate::Style;
 
 pub struct StyleBuilder<'a>
 {
-    base_path: Option<&'a str>,
     object_key_prefix: Option<&'a str>,
     object_key_suffix: Option<&'a str>,
     array_key_prefix: Option<&'a str>,
@@ -15,7 +14,6 @@ pub struct StyleBuilder<'a>
 impl<'a> StyleBuilder<'a> {
     pub fn new() -> Self {
         StyleBuilder {
-            base_path: None,
             object_key_prefix: None,
             object_key_suffix: None,
             array_key_prefix: None,
@@ -23,11 +21,6 @@ impl<'a> StyleBuilder<'a> {
             indices_in_path: true,
             skip_parents: false,
         }
-    }
-
-    pub fn base_path(mut self, value: &'a str) -> Self {
-        self.base_path = Some(value);
-        self
     }
 
     pub fn object_key_prefix(mut self, value: &'a str) -> Self {
