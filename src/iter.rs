@@ -1,4 +1,4 @@
-use crate::style::{Style, Styles};
+use crate::style::{PresetStyle, Style};
 use serde_json::Value;
 use std::collections::VecDeque;
 
@@ -26,7 +26,7 @@ impl<'a> Iter<'a> {
 
         Self {
             items: queue,
-            style: Style::from(&Styles::SquareBrackets),
+            style: Style::from(&PresetStyle::SquareBrackets),
         }
     }
 
@@ -57,7 +57,7 @@ impl<'a> Iterator for Iter<'a> {
                         });
                     }
 
-                    match self.style.skip_parents {
+                    match self.style.skip_parents() {
                         true => continue 'items,
                         false => return Some(el),
                     };
@@ -74,7 +74,7 @@ impl<'a> Iterator for Iter<'a> {
                         });
                     }
 
-                    match self.style.skip_parents {
+                    match self.style.skip_parents() {
                         true => continue 'items,
                         false => return Some(el),
                     };
@@ -89,7 +89,7 @@ impl<'a> Iterator for Iter<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::style::builder::StyleBuilder;
+    use crate::style::StyleBuilder;
     use serde_json::json;
 
     #[test]
@@ -195,7 +195,6 @@ mod tests {
             "middle": true,
             "last": ["a", "b", "c"],
         });
-        // let style = Styles::CommonJs;
         let style = StyleBuilder::new().skip_parents().build().unwrap();
         let items: Vec<_> = Iter::new(&value).use_style(style).collect();
 

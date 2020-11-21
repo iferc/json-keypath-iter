@@ -1,7 +1,6 @@
-use crate::Style;
+use super::*;
 
-pub struct StyleBuilder<'a>
-{
+pub struct StyleBuilder<'a> {
     object_key_prefix: Option<&'a str>,
     object_key_suffix: Option<&'a str>,
     array_key_prefix: Option<&'a str>,
