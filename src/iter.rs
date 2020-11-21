@@ -1,4 +1,4 @@
-use crate::style::{Styles, Style};
+use crate::style::{Style, Styles};
 use serde_json::Value;
 use std::collections::VecDeque;
 
@@ -46,7 +46,7 @@ impl<'a> Iterator for Iter<'a> {
     type Item = Element<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(el) = self.items.pop_front() {
+        'items: while let Some(el) = self.items.pop_front() {
             match el.value {
                 Value::Object(obj) => {
                     for (key, val) in obj.iter().rev() {
@@ -64,8 +64,9 @@ impl<'a> Iterator for Iter<'a> {
                             value: val,
                         });
                     }
-                    if !self.style.skip_parents {
-                        return Some(el);
+                    match self.style.skip_parents {
+                        true => continue 'items,
+                        false => return Some(el),
                     }
                 }
                 Value::Array(arr) => {
@@ -81,9 +82,7 @@ impl<'a> Iterator for Iter<'a> {
                         } else {
                             format!(
                                 "{}{}{}",
-                                el.path,
-                                self.style.array_key_prefix,
-                                self.style.array_key_suffix,
+                                el.path, self.style.array_key_prefix, self.style.array_key_suffix,
                             )
                         };
 
@@ -96,11 +95,12 @@ impl<'a> Iterator for Iter<'a> {
                             value: val,
                         });
                     }
-                    if !self.style.skip_parents {
-                        return Some(el);
+                    match self.style.skip_parents {
+                        true => continue 'items,
+                        false => return Some(el),
                     }
                 }
-                _ => return Some(el)
+                _ => return Some(el),
             }
         }
         None
@@ -197,7 +197,6 @@ mod tests {
         println!("jkpi: {} {:#?}", list.len(), list);
         assert_eq!(list.len(), 2);
     }
-
 
     #[test]
     fn test_four() {
