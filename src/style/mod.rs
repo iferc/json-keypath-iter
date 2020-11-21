@@ -1,3 +1,5 @@
+pub mod builder;
+
 pub enum Styles<'a> {
     SquareBrackets,
     CommonJs,

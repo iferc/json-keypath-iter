@@ -89,7 +89,7 @@ impl<'a> Iterator for Iter<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::builder::StyleBuilder;
+    use crate::style::builder::StyleBuilder;
     use serde_json::json;
 
     #[test]
