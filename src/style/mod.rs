@@ -8,10 +8,10 @@ pub struct Style<'a> {
     object_key_prefix: &'a str,
     object_key_suffix: &'a str,
     object_keys_in_path: bool,
+    skip_object_parents: bool,
     array_key_prefix: &'a str,
     array_key_suffix: &'a str,
     array_keys_in_path: bool,
-    skip_object_parents: bool,
     skip_array_parents: bool,
 }
 

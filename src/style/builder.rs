@@ -25,61 +25,89 @@ impl<'a> StyleBuilder<'a> {
         }
     }
 
+    pub fn default_object_key_prefix(mut self) -> Self {
+        self.object_key_prefix = None;
+        self
+    }
     pub fn object_key_prefix(mut self, value: &'a str) -> Self {
         self.object_key_prefix = Some(value);
         self
     }
 
+    pub fn default_object_key_suffix(mut self) -> Self {
+        self.object_key_suffix = None;
+        self
+    }
     pub fn object_key_suffix(mut self, value: &'a str) -> Self {
         self.object_key_suffix = Some(value);
         self
     }
 
+    pub fn default_object_keys_in_path(mut self) -> Self {
+        self.object_keys_in_path = None;
+        self
+    }
     pub fn show_object_keys_in_path(mut self) -> Self {
         self.object_keys_in_path = Some(true);
         self
     }
-
     pub fn hide_object_keys_in_path(mut self) -> Self {
         self.object_keys_in_path = Some(false);
         self
     }
 
+    pub fn default_object_parents(mut self) -> Self {
+        self.skip_object_parents = None;
+        self
+    }
     pub fn skip_object_parents(mut self) -> Self {
         self.skip_object_parents = Some(true);
         self
     }
-
     pub fn include_object_parents(mut self) -> Self {
         self.skip_object_parents = Some(false);
         self
     }
 
+    pub fn default_array_key_prefix(mut self) -> Self {
+        self.array_key_prefix = None;
+        self
+    }
     pub fn array_key_prefix(mut self, value: &'a str) -> Self {
         self.array_key_prefix = Some(value);
         self
     }
 
+    pub fn default_array_key_suffix(mut self) -> Self {
+        self.array_key_suffix = None;
+        self
+    }
     pub fn array_key_suffix(mut self, value: &'a str) -> Self {
         self.array_key_suffix = Some(value);
         self
     }
 
+    pub fn default_array_keys_in_path(mut self) -> Self {
+        self.array_keys_in_path = None;
+        self
+    }
     pub fn show_array_keys_in_path(mut self) -> Self {
         self.array_keys_in_path = Some(true);
         self
     }
-
     pub fn hide_array_keys_in_path(mut self) -> Self {
         self.array_keys_in_path = Some(false);
         self
     }
 
+    pub fn default_array_parents(mut self) -> Self {
+        self.skip_array_parents = None;
+        self
+    }
     pub fn skip_array_parents(mut self) -> Self {
         self.skip_array_parents = Some(true);
         self
     }
-
     pub fn include_array_parents(mut self) -> Self {
         self.skip_array_parents = Some(false);
         self
