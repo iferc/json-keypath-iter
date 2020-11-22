@@ -26,7 +26,7 @@ impl<'a> Iter<'a> {
 
         Self {
             items: queue,
-            style: Style::from(&PresetStyle::SquareBrackets),
+            style: PresetStyle::SquareBrackets.into(),
         }
     }
 
