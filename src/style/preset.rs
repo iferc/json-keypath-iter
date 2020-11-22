@@ -6,15 +6,15 @@ pub enum PresetStyle {
     PostgresJson,
 }
 
-impl<'a> From<&'a PresetStyle> for Style<'a> {
-    fn from(style: &'a PresetStyle) -> Style<'a> {
+impl<'a> From<PresetStyle> for Style<'a> {
+    fn from(style: PresetStyle) -> Style<'a> {
         let builder: StyleBuilder<'a> = style.into();
         builder.build()
     }
 }
 
-impl<'a> From<&'a PresetStyle> for StyleBuilder<'a> {
-    fn from(style: &'a PresetStyle) -> StyleBuilder<'a> {
+impl<'a> From<PresetStyle> for StyleBuilder<'a> {
+    fn from(style: PresetStyle) -> StyleBuilder<'a> {
         match style {
             PresetStyle::SquareBrackets => {
                 return StyleBuilder::new()
