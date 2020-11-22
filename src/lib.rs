@@ -1,5 +1,5 @@
-pub mod style;
-pub use style::*;
+mod style;
+pub use style::{PresetStyle, Style, StyleBuilder};
 
-pub mod iter;
-pub use iter::*;
+mod iter;
+pub use iter::{Element, Iter as Iterator};
