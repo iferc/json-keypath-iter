@@ -3,11 +3,12 @@ use super::*;
 pub struct StyleBuilder<'a> {
     object_key_prefix: Option<&'a str>,
     object_key_suffix: Option<&'a str>,
+    object_keys_in_path: Option<bool>,
+    skip_object_parents: Option<bool>,
     array_key_prefix: Option<&'a str>,
     array_key_suffix: Option<&'a str>,
-    indices_in_path: bool,
-    /// whether to use callback when element has children
-    skip_parents: bool,
+    array_keys_in_path: Option<bool>,
+    skip_array_parents: Option<bool>,
 }
 
 impl<'a> StyleBuilder<'a> {
@@ -15,10 +16,12 @@ impl<'a> StyleBuilder<'a> {
         StyleBuilder {
             object_key_prefix: None,
             object_key_suffix: None,
+            object_keys_in_path: None,
+            skip_object_parents: None,
             array_key_prefix: None,
             array_key_suffix: None,
-            indices_in_path: true,
-            skip_parents: false,
+            array_keys_in_path: None,
+            skip_array_parents: None,
         }
     }
 
@@ -32,6 +35,26 @@ impl<'a> StyleBuilder<'a> {
         self
     }
 
+    pub fn show_object_keys_in_path(mut self) -> Self {
+        self.object_keys_in_path = Some(true);
+        self
+    }
+
+    pub fn hide_object_keys_in_path(mut self) -> Self {
+        self.object_keys_in_path = Some(false);
+        self
+    }
+
+    pub fn skip_object_parents(mut self) -> Self {
+        self.skip_object_parents = Some(true);
+        self
+    }
+
+    pub fn include_object_parents(mut self) -> Self {
+        self.skip_object_parents = Some(false);
+        self
+    }
+
     pub fn array_key_prefix(mut self, value: &'a str) -> Self {
         self.array_key_prefix = Some(value);
         self
@@ -42,34 +65,36 @@ impl<'a> StyleBuilder<'a> {
         self
     }
 
-    pub fn show_indices_in_path(mut self) -> Self {
-        self.indices_in_path = true;
+    pub fn show_array_keys_in_path(mut self) -> Self {
+        self.array_keys_in_path = Some(true);
         self
     }
 
-    pub fn hide_indices_in_path(mut self) -> Self {
-        self.indices_in_path = false;
+    pub fn hide_array_keys_in_path(mut self) -> Self {
+        self.array_keys_in_path = Some(false);
         self
     }
 
-    pub fn skip_parents(mut self) -> Self {
-        self.skip_parents = true;
+    pub fn skip_array_parents(mut self) -> Self {
+        self.skip_array_parents = Some(true);
         self
     }
 
-    pub fn show_parents(mut self) -> Self {
-        self.skip_parents = false;
+    pub fn include_array_parents(mut self) -> Self {
+        self.skip_array_parents = Some(false);
         self
     }
 
-    pub fn build(&self) -> Result<Style<'a>, &'static str> {
-        Ok(Style {
+    pub fn build(&self) -> Style<'a> {
+        Style {
             object_key_prefix: self.object_key_prefix.unwrap_or("[\""),
             object_key_suffix: self.object_key_suffix.unwrap_or("\"]"),
+            object_keys_in_path: self.object_keys_in_path.unwrap_or(true),
+            skip_object_parents: self.skip_object_parents.unwrap_or(true),
             array_key_prefix: self.array_key_prefix.unwrap_or("["),
             array_key_suffix: self.array_key_suffix.unwrap_or("]"),
-            indices_in_path: self.indices_in_path,
-            skip_parents: self.skip_parents,
-        })
+            array_keys_in_path: self.array_keys_in_path.unwrap_or(true),
+            skip_array_parents: self.skip_array_parents.unwrap_or(true),
+        }
     }
 }

@@ -57,7 +57,7 @@ impl<'a> Iterator for Iter<'a> {
                         });
                     }
 
-                    match self.style.skip_parents() {
+                    match self.style.should_skip_object_parents() {
                         true => continue 'items,
                         false => return Some(el),
                     };
@@ -74,7 +74,7 @@ impl<'a> Iterator for Iter<'a> {
                         });
                     }
 
-                    match self.style.skip_parents() {
+                    match self.style.should_skip_array_parents() {
                         true => continue 'items,
                         false => return Some(el),
                     };
@@ -159,7 +159,8 @@ mod tests {
     #[test]
     fn array_to_iter() {
         let value = json!([null, null]);
-        let items: Vec<_> = Iter::new(&value).collect();
+        let style = StyleBuilder::new().include_array_parents().build();
+        let items: Vec<_> = Iter::new(&value).use_style(style).collect();
 
         assert_eq!(items.len(), 3);
         assert_eq!(
@@ -175,7 +176,8 @@ mod tests {
     #[test]
     fn object_to_iter() {
         let value = json!({ "a": true, "b": false });
-        let items: Vec<_> = Iter::new(&value).collect();
+        let style = StyleBuilder::new().include_object_parents().build();
+        let items: Vec<_> = Iter::new(&value).use_style(style).collect();
 
         assert_eq!(items.len(), 3);
         assert_eq!(
@@ -195,7 +197,10 @@ mod tests {
             "middle": true,
             "last": ["a", "b", "c"],
         });
-        let style = StyleBuilder::new().skip_parents().build().unwrap();
+        let style = StyleBuilder::new()
+            .skip_object_parents()
+            .skip_array_parents()
+            .build();
         let items: Vec<_> = Iter::new(&value).use_style(style).collect();
 
         assert_eq!(items.len(), 7);
@@ -225,17 +230,18 @@ mod tests {
         let style = StyleBuilder::new()
             .object_key_prefix("!")
             .object_key_suffix("@")
+            .show_object_keys_in_path()
+            .include_object_parents()
             .array_key_prefix("#")
             .array_key_suffix("$")
-            .hide_indices_in_path()
-            .skip_parents()
-            .build()
-            .unwrap();
+            .hide_array_keys_in_path()
+            .include_array_parents()
+            .build();
         let items: Vec<_> = Iter::new(&value).use_style(style).collect();
 
-        assert_eq!(items.len(), 3);
+        assert_eq!(items.len(), 5);
         assert_eq!(
-            items[1],
+            items[3],
             Element {
                 path: String::from("!first@#$"),
                 indices: vec![1],
@@ -251,7 +257,11 @@ mod tests {
             "middle": true,
             "last": ["a", "b", "c"],
         });
-        let items: Vec<_> = Iter::new(&value).collect();
+        let style = StyleBuilder::new()
+            .include_object_parents()
+            .include_array_parents()
+            .build();
+        let items: Vec<_> = Iter::new(&value).use_style(style).collect();
 
         assert_eq!(items.len(), 10);
         assert_eq!(
@@ -299,7 +309,11 @@ mod tests {
         });
 
         let mut collection = Vec::new();
-        for item in Iter::new(&value) {
+        let style = StyleBuilder::new()
+            .include_object_parents()
+            .include_array_parents()
+            .build();
+        for item in Iter::new(&value).use_style(style) {
             collection.push(item);
         }
 
