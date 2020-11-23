@@ -9,6 +9,8 @@ Iterator for traversing serde json objects, yielding a flattened path and value 
 repository = "https://github.com/iferc/json-keypath-iter"
 keywords = ["json", "field", "path", "flat", "iterator"]
 license = "MIT OR Apache-2.0"
+readme = "./README.md"
+exclude = [".github", "example"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

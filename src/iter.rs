@@ -2,20 +2,40 @@ use crate::style::{PresetStyle, Style};
 use serde_json::Value;
 use std::collections::VecDeque;
 
+/// Single element struct containing the path, set of array indices, and json value
 #[derive(Debug, PartialEq)]
 pub struct Element<'a> {
+    /// The full path from the base of a json structure to the value contained in the `Element`
     pub path: String,
+    /// The full set of _array_ indices in the path, useful for grouping sets of `Element` structs to the same array element
     pub indices: Vec<usize>,
+    /// The `serde_json::Value` of described by the path
     pub value: &'a Value,
 }
 
+/// Iteration strict containing a queue of elements that still need to be yielded along with a style object
 #[derive(Debug)]
 pub struct Iter<'a> {
     style: Style<'a>,
     items: VecDeque<Element<'a>>,
 }
 
+/// Named `Iter` internally, but `Iterator` externally
 impl<'a> Iter<'a> {
+    /// Create a new json keypath iterator
+    ///
+    /// Example:
+    /// ```rust
+    /// use serde_json::json;
+    /// use json_keypath_iter::{Iterator, Element};
+    ///
+    /// let value = json!({"a": [1, 2]});
+    /// let iter = Iterator::new(&value);
+    /// let items: Vec<_> = iter.collect();
+    ///
+    /// assert_eq!(items[0], Element { path: "[\"a\"][0]".into(), indices: vec![0], value: &json!(1), });
+    /// assert_eq!(items[1], Element { path: "[\"a\"][1]".into(), indices: vec![1], value: &json!(2), });
+    /// ```
     pub fn new(json: &'a Value) -> Self {
         let mut queue = VecDeque::new();
         queue.push_back(Element {
@@ -30,6 +50,22 @@ impl<'a> Iter<'a> {
         }
     }
 
+    /// Optionally used to set a custom style for the path in elements
+    ///
+    /// Example:
+    /// ```rust
+    /// use serde_json::json;
+    /// use json_keypath_iter::{Style, PresetStyle, Iterator, Element};
+    ///
+    /// let style: Style = PresetStyle::CommonJs.into();
+    /// let value = json!({"x42": [true, [null, "Hello there."]]});
+    /// let iter = Iterator::new(&value).use_style(style);
+    /// let items: Vec<_> = iter.collect();
+    ///
+    /// assert_eq!(items[0], Element { path: ".x42[0]".into(), indices: vec![0], value: &json!(true), });
+    /// assert_eq!(items[1], Element { path: ".x42[1][0]".into(), indices: vec![1, 0], value: &json!(null), });
+    /// assert_eq!(items[2], Element { path: ".x42[1][1]".into(), indices: vec![1, 1], value: &json!("Hello there."), });
+    /// ```
     pub fn use_style(mut self, style: Style<'a>) -> Self {
         self.style = style;
         self

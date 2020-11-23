@@ -3,6 +3,8 @@ mod preset;
 pub use builder::StyleBuilder;
 pub use preset::PresetStyle;
 
+/// Used by `Iterator` to format `Element.path` and
+/// determine whether or not to yield object and/or array values
 #[derive(Debug)]
 pub struct Style<'a> {
     object_key_prefix: &'a str,

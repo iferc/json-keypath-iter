@@ -1,8 +1,18 @@
 use super::*;
 
+/// Included preset stylings
 pub enum PresetStyle {
+    /// This yields a path that looks like: `["some_key"][123]`
+    ///
+    /// The Iterator also yields only non-object and non-array values with this style
     SquareBrackets,
+    /// This yields a path that looks like: `.some_key[123]`
+    ///
+    /// The Iterator also yields only non-object and non-array values with this style
     CommonJs,
+    /// This yields a path that looks like: `->'some_key'->123`
+    ///
+    /// The Iterator also yields only non-object and non-array values with this style
     PostgresJson,
 }
 
